@@ -5,6 +5,7 @@ import (
     "github.com/antchfx/htmlquery"
     "golang.org/x/net/html"
     "ntumods/pkg/course"
+    "ntumods/pkg/dto"
     "os"
     "strings"
 )
@@ -90,4 +91,36 @@ func parseToCourse(node *html.Node) (course.Course, error) {
         return resp, err
     }
     return resp, nil
+}
+
+func ParseCourseSchedules(doc *html.Node) (*dto.CourseSchedules, error) {
+    courseSchedules := &dto.CourseSchedules{}
+
+    // Query for the "acadsem" select options
+    acadsemNodes, err := htmlquery.QueryAll(doc, `//select[@name="acadsem"]/option[not(contains(@value, "_S"))]`)
+    if err != nil {
+        return nil, err
+    }
+
+    for _, node := range acadsemNodes {
+        acadYearSem := htmlquery.SelectAttr(node, "value")
+        if acadYearSem != "" {
+            courseSchedules.AcadYearSem = append(courseSchedules.AcadYearSem, acadYearSem)
+        }
+    }
+
+    // Query for the "r_course_yr" select options
+    courseYearProgNodes, err := htmlquery.QueryAll(doc, `//select[@name="r_course_yr"]/option`)
+    if err != nil {
+        return nil, err
+    }
+
+    for _, node := range courseYearProgNodes {
+        courseYearProg := htmlquery.SelectAttr(node, "value")
+        if courseYearProg != "" {
+            courseSchedules.CourseYearProg = append(courseSchedules.CourseYearProg, courseYearProg)
+        }
+    }
+
+    return courseSchedules, nil
 }
