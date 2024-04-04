@@ -19,18 +19,18 @@ type CourseScheduleRequestDto struct {
 }
 
 type CourseExamScheduleRequestDto struct {
-	ExamSubject string
-	PlanNo      string
-	ExamDateTime string
-	ExamStartTime string
-	ExamDepartment string
-	ExamVenue string
-	Matric string
+	ExamSubject     string
+	PlanNo          string
+	ExamDateTime    string
+	ExamStartTime   string
+	ExamDepartment  string
+	ExamVenue       string
+	Matric          string
 	AcademicSession string
-	ExamYear string
-	ExamSemester string
-	ExamType string
-	BOption string
+	ExamYear        string
+	ExamSemester    string
+	ExamType        string
+	BOption         string
 }
 
 type CourseSchedules struct {
@@ -40,8 +40,10 @@ type CourseSchedules struct {
 
 // ModuleLite is a lightweight representation of a module
 type ModuleLite struct {
-	Code   string `json:"code"`
-	Module string `json:"module"`
+	Code        string `json:"code"`
+	Module      string `json:"module"`
+	Description string `json:"description"`
+	AU          string `json:"au"`
 }
 
 // Module is a structure containing the module code, title, and the semesters which it is offered
@@ -68,5 +70,5 @@ type ExamSchedule struct {
 	Time      string `json:"time"`
 	Code      string `json:"code"`
 	Title     string `json:"title"`
-	Duration string `json:"duration"`
+	Duration  string `json:"duration"`
 }

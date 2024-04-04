@@ -63,20 +63,30 @@ func main() {
         go workerC(examChan)
     }
 
+    numSemesters := len(init.AcadYearSem)
+    latestSemester := init.AcadYearSem[numSemesters-1]
+    for i := numSemesters - 1; i >= 0; i-- {
+        semester := init.AcadYearSem[i]
+        if !strings.Contains(semester, "Special Term") {
+            latestSemester = semester
+            break
+        }
+    }
+
     // Send CourseYearProg data to worker A and worker B goroutines
     for i := 0; i < 1; i++ {
-        //courseYearProg := init.CourseYearProg[i]
-        courseYearProg := "CSC;;4;F"
-        acadYearSem := init.AcadYearSem[len(init.AcadYearSem)-1]
+        courseYearProg := init.CourseYearProg[i]
+        //courseYearProg := "CSC;;4;F"
 
         request := waParams{
             CourseYearProg: courseYearProg,
-            AcadYearSem:    acadYearSem,
+            AcadYearSem:    latestSemester,
         }
 
         courseYearProgChan <- request
         courseChan <- request
     }
+
     close(courseYearProgChan)
     close(courseChan)
     wg.Wait()
