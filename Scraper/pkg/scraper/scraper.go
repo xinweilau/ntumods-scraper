@@ -87,6 +87,36 @@ func GetCourseSchedule(request dto.CourseScheduleRequestDto) ([]dto.Module, erro
 	return parser.ParseCourseModuleSchedules(doc), nil
 }
 
+func GetExamSchedule(request dto.CourseExamScheduleRequestDto) ([]dto.ExamSchedule, error) {
+	params, err := constructRequiredExamScheduleFormData(request)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+
+	payload := strings.NewReader(params.Encode())
+	req, err := http.NewRequest("POST", dto.EXAM_SCHEDULE, payload)
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	doc, err := html.Parse(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return parser.ParseExamSchedules(doc)
+}
+
 func constructRequiredCourseListFormData(params dto.CourseListRequestDto) (*url.Values, error) {
 	values := &url.Values{}
 	vVal := reflect.ValueOf(params)
@@ -125,6 +155,36 @@ func constructRequiredCourseScheduleFormData(params dto.CourseScheduleRequestDto
 		"BOption":     "boption",
 		"SearchType":  "r_search_type",
 		"StaffAccess": "staff_access",
+	}
+
+	for i := 0; i < vVal.NumField(); i++ {
+		field := vVal.Field(i)
+		fieldType := vVal.Type().Field(i)
+		key := requestMap[fieldType.Name]
+
+		values.Add(key, field.String())
+	}
+
+	return values, nil
+}
+
+func constructRequiredExamScheduleFormData(params dto.CourseExamScheduleRequestDto) (*url.Values, error) {
+	values := &url.Values{}
+	vVal := reflect.ValueOf(params)
+
+	requestMap := map[string]string{
+		"ExamSubject":     "p_subj",
+		"PlanNo":          "p_plan_no",
+		"ExamDateTime":    "p_exam_dt",
+		"ExamStartTime":   "p_start_time",
+		"ExamDepartment":  "p_dept",
+		"ExamVenue":       "p_venue",
+		"Matric":          "p_matric",
+		"AcademicSession": "academic_session",
+		"ExamYear":        "p_exam_yr",
+		"ExamSemester":    "p_semester",
+		"ExamType":        "p_type",
+		"BOption":         "bOption",
 	}
 
 	for i := 0; i < vVal.NumField(); i++ {

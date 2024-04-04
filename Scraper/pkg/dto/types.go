@@ -18,6 +18,21 @@ type CourseScheduleRequestDto struct {
 	StaffAccess string
 }
 
+type CourseExamScheduleRequestDto struct {
+	ExamSubject string
+	PlanNo      string
+	ExamDateTime string
+	ExamStartTime string
+	ExamDepartment string
+	ExamVenue string
+	Matric string
+	AcademicSession string
+	ExamYear string
+	ExamSemester string
+	ExamType string
+	BOption string
+}
+
 type CourseSchedules struct {
 	AcadYearSem    []string
 	CourseYearProg []string
@@ -45,4 +60,13 @@ type Schedule struct {
 	IndexGroup string `json:"indexGroup"`
 	DayOfWeek  string `json:"dayOfWeek"`
 	Remarks    string `json:"remarks"`
+}
+
+type ExamSchedule struct {
+	Date      string `json:"date"`
+	DayOfWeek string `json:"dayOfWeek"`
+	Time      string `json:"time"`
+	Code      string `json:"code"`
+	Title     string `json:"title"`
+	Duration string `json:"duration"`
 }

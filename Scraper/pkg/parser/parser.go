@@ -187,3 +187,32 @@ func ParseCourseModuleSchedules(doc *html.Node) []dto.Module {
 
 	return modules
 }
+func ParseExamSchedules(doc *html.Node) ([]dto.ExamSchedule, error) {
+	examSchedule := make([]dto.ExamSchedule, 0)
+
+	examNodes, err := htmlquery.QueryAll(doc, `//table[@border="1"]/tbody/tr[not(td/@colspan="7") and normalize-space(td)]`)
+	if err != nil {
+		return nil, err
+	}
+
+	// Iterate through each row of exam schedule
+	// Skips first row as it is the header of the table
+	if len(examNodes) > 1 {
+		examNodes = examNodes[1:]
+	}
+
+	for _, node := range examNodes {
+		scheduleNode := htmlquery.Find(node, "./td")
+
+		examSchedule = append(examSchedule, dto.ExamSchedule{
+			Date:      strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[0])), " "),
+			DayOfWeek: strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[1])), " "),
+			Time:      strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[2])), " "),
+			Code:      strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[3])), " "),
+			Title:     strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[4])), " "),
+			Duration:  strings.Join(strings.Fields(htmlquery.InnerText(scheduleNode[5])), " "),
+		})
+	}
+
+	return examSchedule, nil
+}
