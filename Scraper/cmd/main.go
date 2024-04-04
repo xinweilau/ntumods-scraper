@@ -53,7 +53,7 @@ func main() {
 
     // Start worker B goroutines
     for i := 0; i < maxWorkers; i++ {
-        wg.Add(1) // Do the same for workerB goroutines
+        //wg.Add(1) // Do the same for workerB goroutines
         go workerB(courseChan, examChan)
     }
 
@@ -74,7 +74,8 @@ func main() {
     }
 
     // Send CourseYearProg data to worker A and worker B goroutines
-    for i := 0; i < 1; i++ {
+    numCourses := len(init.CourseYearProg)
+    for i := 0; i < numCourses; i++ {
         courseYearProg := init.CourseYearProg[i]
         //courseYearProg := "CSC;;4;F"
 
@@ -84,7 +85,7 @@ func main() {
         }
 
         courseYearProgChan <- request
-        courseChan <- request
+        //courseChan <- request
     }
 
     close(courseYearProgChan)
@@ -94,6 +95,7 @@ func main() {
     close(examChan) // Close after worker B has finished
     wg2.Wait()      // Wait for worker C to finish
 
+    numModules := 0
     processedCourses.Range(func(key, value interface{}) bool {
         c := value.(Combined)
 
@@ -103,11 +105,15 @@ func main() {
         }
         moduleList = append(moduleList, moduleLite)
 
+        numModules += 1
+
         exportStructToFile(key.(string), value)
         return true
     })
 
     exportStructToFile("moduleList", moduleList)
+
+    fmt.Println("Extraction Complete (numModules = ", numModules, ")")
 }
 
 func workerA(courseYearProgChan <-chan waParams) {
