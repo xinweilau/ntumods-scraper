@@ -53,7 +53,7 @@ func main() {
 
     // Start worker B goroutines
     for i := 0; i < maxWorkers; i++ {
-        //wg.Add(1) // Do the same for workerB goroutines
+        wg.Add(1) // Do the same for workerB goroutines
         go workerB(courseChan, examChan)
     }
 
@@ -77,7 +77,6 @@ func main() {
     numCourses := len(init.CourseYearProg)
     for i := 0; i < numCourses; i++ {
         courseYearProg := init.CourseYearProg[i]
-        //courseYearProg := "CSC;;4;F"
 
         request := waParams{
             CourseYearProg: courseYearProg,
@@ -139,6 +138,10 @@ func workerA(courseYearProgChan <-chan waParams) {
         }
 
         for _, c := range res {
+            if dto.IsEmpty(c) {
+                continue
+            }
+
             if loaded, exists := processedCourses.Load(c.Code); exists {
                 if currCombined, ok := loaded.(Combined); ok {
                     processedCourses.Store(c.Code, Combined{
@@ -173,6 +176,10 @@ func workerB(courseChan <-chan waParams, examChan chan<- wbParams) {
         }
 
         for _, c := range res {
+            if dto.IsEmpty(c) {
+                continue
+            }
+
             if loaded, exists := processedCourses.Load(c.Code); exists {
                 if currCombined, ok := loaded.(Combined); ok {
                     processedCourses.Store(c.Code, Combined{
@@ -189,6 +196,10 @@ func workerB(courseChan <-chan waParams, examChan chan<- wbParams) {
         }
 
         for _, c := range res {
+            if dto.IsEmpty(c) {
+                continue
+            }
+
             examChan <- wbParams{
                 AcadYearSem: course.AcadYearSem,
                 Code:        c.Code,
