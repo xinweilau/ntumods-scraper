@@ -45,6 +45,10 @@ func parseToCourse(node *html.Node) (dto.Course, error) {
 		return resp, nil
 	}
 
+	if len(nodes) == 0 {
+		return resp, nil
+	}
+
 	course := make(map[string]interface{})
 
 	// The first 3 values will always be the course information
