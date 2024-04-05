@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"ntumods/pkg/dto"
 	"ntumods/pkg/scraper"
 	"ntumods/pkg/utils"
+	"os"
 	"strings"
 	"sync"
 )
@@ -26,6 +28,7 @@ type examDetailParams struct {
 
 type Combined struct {
 	dto.Course
+	dto.Faculty
 	Exam     dto.ExamSchedule `json:"exam"`
 	Schedule []dto.Schedule   `json:"schedule"`
 }
@@ -34,6 +37,11 @@ var courseDetailWg sync.WaitGroup
 var examDetailWg sync.WaitGroup
 
 func main() {
+	facultyInformation, err := populateFacultyInformation()
+	if err != nil {
+		panic(err)
+	}
+
 	init, err := scraper.GetCourseSchedulePair()
 	if err != nil {
 		panic(err)
@@ -46,7 +54,7 @@ func main() {
 	// Start worker A goroutines
 	for i := 0; i < maxWorkers; i++ {
 		courseDetailWg.Add(1)
-		go getContentOfCourses(courseYearProgChan)
+		go getContentOfCourses(courseYearProgChan, facultyInformation)
 	}
 
 	// Start worker B goroutines
@@ -101,6 +109,7 @@ func main() {
 			Module:      c.Course.Title,
 			AU:          c.AU,
 			Description: c.Description,
+			Faculty:     c.Faculty,
 		}
 
 		if !utils.IsEmpty(moduleLite) {
@@ -118,7 +127,7 @@ func main() {
 	fmt.Println("Extraction Complete (numModules = ", numModules, ")")
 }
 
-func getContentOfCourses(courseYearProgChan <-chan courseDetailParams) {
+func getContentOfCourses(courseYearProgChan <-chan courseDetailParams, facultyInformation map[string]dto.Faculty) {
 	defer courseDetailWg.Done() // Decrement the counter when the goroutine completes
 	for courseYearProg := range courseYearProgChan {
 		fmt.Println("[WorkerA] Processing Course Content (", courseYearProg.AcadYearSem, ", ", courseYearProg.CourseYearProg, ")")
@@ -143,6 +152,18 @@ func getContentOfCourses(courseYearProgChan <-chan courseDetailParams) {
 		for _, c := range res {
 			if utils.IsEmpty(c) {
 				continue
+			}
+
+			// Need to resolve the course code here, course code could start with either 2 or 3 characters
+			// We will first attempt to map 2 characters, because it could be possible AA might supersede AAA
+			codeA := c.Code[:2]
+			if faculty, exists := facultyInformation[codeA]; exists {
+				c.Faculty = faculty
+			}
+
+			codeB := c.Code[:3]
+			if faculty, exists := facultyInformation[codeB]; exists {
+				c.Faculty = faculty
 			}
 
 			if loaded, exists := processedCourses.Load(c.Code); exists {
@@ -248,4 +269,28 @@ func getExamSchedule(examChan <-chan examDetailParams) {
 			}
 		}
 	}
+}
+
+func populateFacultyInformation() (map[string]dto.Faculty, error) {
+	data, err := os.ReadFile("../data/faculty.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return nil, err
+	}
+
+	var facultyData map[string]dto.Faculty
+	err = json.Unmarshal(data, &facultyData)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, err
+	}
+
+	output := make(map[string]dto.Faculty)
+	for keys, faculty := range facultyData {
+		for _, key := range strings.Split(keys, ";") {
+			output[key] = faculty
+		}
+	}
+
+	return output, nil
 }

@@ -1,0 +1,82 @@
+{
+  "DD;DN;DM;DR;DV;DF;DP;DT;DA": {
+    "Faculty": "School of Art, Design and Media",
+    "Code": "ADM"
+  },
+  "AB;AC;AD;BA;BC;BE;BF;BH;BL;BM;BR;BU;HE": {
+    "Faculty": "Nanyang Business School",
+    "FacultyCode": "NBS"
+  },
+  "HC;HL;HR;HY;HW;HH;HG;HN;HD": {
+    "Faculty": "School of Humanities",
+    "Code": "SOH"
+  },
+  "HA;HP;HS;HU;HE": {
+    "Faculty": "School of Social Sciences",
+    "Code": "SSS"
+  },
+  "CS;FL": {
+    "Faculty": "Wee Kim Wee School of Communication and Information",
+    "Code": "WKWSCI"
+  },
+  "CM;CB;CH;BG": {
+    "Faculty": "School of Chemistry, Chemical Engineering and Biotechnology",
+    "Code": "CCEB"
+  },
+  "EE;IE": {
+    "Faculty": "School of Electrical and Electronic Engineering (EEE)",
+    "Code": "EEE"
+  },
+  "MA": {
+    "Faculty": "School of Mechanical and Aerospace Engineering (MAE)",
+    "Code": "MAE"
+  },
+  "MS;EM": {
+    "Faculty": "School of Materials Science and Engineering (MSE)",
+    "Code": "MSE"
+  },
+  "CV;EN;MT;SU": {
+    "Faculty": "School of Civil and Environmental Engineering (CEE)",
+    "Code": "CEE"
+  },
+  "CZ;SC;CE": {
+    "Faculty": "School of Computer Science and Engineering",
+    "Code": "SCSE"
+  },
+  "MH;PH": {
+    "Faculty": "School of Physical and Mathematical Sciences",
+    "Code": "SPMS"
+  },
+  "BS;AAB;BG": {
+    "Faculty": "School of Biological Sciences",
+    "Code": "SBS"
+  },
+  "ES": {
+    "Faculty": "The Asian School of the Environment",
+    "Code": "ASE"
+  },
+  "MD": {
+    "Faculty": "Lee Kong Chian School of Medicine",
+    "Code": "LKC Medicine"
+  },
+  "SS;AAA;AAB;AAE;AAF;AAG;AAH;AAI;AAL;AAU;ADP;AED;AGE": {
+    "Faculty": "National Institute of Education",
+    "Code": "NIE"
+  },
+  "ET": {
+    "Faculty": "Nanyang Technopreneurship Centre",
+    "Code": "NTC"
+  },
+  "CC": {
+    "Faculty": "Interdisciplinary Collaborative Core",
+    "Code": "ICC"
+  },
+  "SP": {
+    "Faculty": "Premier Scholars Programmes",
+    "Code": "USP"
+  },
+  "PS;EG;GC;ML": {
+    "Faculty": "Others",
+    "Code": "NA"
+  }
+}

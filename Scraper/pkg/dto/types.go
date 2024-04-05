@@ -1,17 +1,18 @@
 package dto
 
 type Course struct {
-	Code                   string `json:"code"`
-	Title                  string `json:"title"`
-	AU                     string `json:"au"`
-	Prerequisite           string `json:"prerequisite"`
-	MutuallyExclusive      string `json:"mutually_exclusive"`
-	NotAvailableTo         string `json:"not_available_to"`
-	NotAvailableToProgWith string `json:"not_available_to_prog_with"`
-	GradeType              string `json:"grade_type"`
-	NotAvailableAsUE       string `json:"not_available_as_ue"`
-	NotAvailableAsPE       string `json:"not_available_as_pe"`
-	Description            string `json:"description"`
+	Code                   string  `json:"code"`
+	Title                  string  `json:"title"`
+	AU                     string  `json:"au"`
+	Prerequisite           string  `json:"prerequisite"`
+	MutuallyExclusive      string  `json:"mutually_exclusive"`
+	NotAvailableTo         string  `json:"not_available_to"`
+	NotAvailableToProgWith string  `json:"not_available_to_prog_with"`
+	GradeType              string  `json:"grade_type"`
+	NotAvailableAsUE       string  `json:"not_available_as_ue"`
+	NotAvailableAsPE       string  `json:"not_available_as_pe"`
+	Description            string  `json:"description"`
+	Faculty                Faculty `json:"faculty"`
 }
 
 type CourseListRequestDto struct {
@@ -54,10 +55,11 @@ type CourseSchedules struct {
 
 // ModuleLite is a lightweight representation of a module
 type ModuleLite struct {
-	Code        string `json:"code"`
-	Module      string `json:"module"`
-	Description string `json:"description"`
-	AU          string `json:"au"`
+	Code        string  `json:"code"`
+	Module      string  `json:"module"`
+	Description string  `json:"description"`
+	AU          string  `json:"au"`
+	Faculty     Faculty `json:"faculty"`
 }
 
 // Module is a structure containing the module code, title, and the semesters which it is offered
@@ -85,4 +87,9 @@ type ExamSchedule struct {
 	Code      string `json:"code"`
 	Title     string `json:"title"`
 	Duration  string `json:"duration"`
+}
+
+type Faculty struct {
+	Title string `json:"Faculty"`
+	Code  string `json:"FacultyCode"`
 }
