@@ -109,7 +109,7 @@ func main() {
 			Module:      c.Course.Title,
 			AU:          c.AU,
 			Description: c.Description,
-			Faculty:     c.Faculty,
+			Faculty:     c.Course.Faculty,
 		}
 
 		if !utils.IsEmpty(moduleLite) {
@@ -150,21 +150,20 @@ func getContentOfCourses(courseYearProgChan <-chan courseDetailParams, facultyIn
 		}
 
 		for _, c := range res {
-			if utils.IsEmpty(c) {
-				continue
-			}
-
 			// Need to resolve the course code here, course code could start with either 2 or 3 characters
 			// We will first attempt to map 2 characters, because it could be possible AA might supersede AAA
+			var faculty dto.Faculty
 			codeA := c.Code[:2]
-			if faculty, exists := facultyInformation[codeA]; exists {
-				c.Faculty = faculty
+			if f, exists := facultyInformation[codeA]; exists {
+				faculty = f
 			}
 
 			codeB := c.Code[:3]
-			if faculty, exists := facultyInformation[codeB]; exists {
-				c.Faculty = faculty
+			if f, exists := facultyInformation[codeB]; exists {
+				faculty = f
 			}
+
+			c.Faculty = faculty
 
 			if loaded, exists := processedCourses.Load(c.Code); exists {
 				if currCombined, ok := loaded.(Combined); ok {
@@ -200,10 +199,6 @@ func getCourseTimetable(courseChan <-chan courseDetailParams, examChan chan<- ex
 		}
 
 		for _, c := range res {
-			if utils.IsEmpty(c) {
-				continue
-			}
-
 			if loaded, exists := processedCourses.Load(c.Code); exists {
 				if currCombined, ok := loaded.(Combined); ok {
 					processedCourses.Store(c.Code, Combined{
@@ -220,10 +215,6 @@ func getCourseTimetable(courseChan <-chan courseDetailParams, examChan chan<- ex
 		}
 
 		for _, c := range res {
-			if utils.IsEmpty(c) {
-				continue
-			}
-
 			examChan <- examDetailParams{
 				AcadYearSem: course.AcadYearSem,
 				Code:        c.Code,
