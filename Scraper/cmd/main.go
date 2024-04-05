@@ -28,7 +28,6 @@ type examDetailParams struct {
 
 type Combined struct {
 	dto.Course
-	dto.Faculty
 	Exam     dto.ExamSchedule `json:"exam"`
 	Schedule []dto.Schedule   `json:"schedule"`
 }
@@ -150,6 +149,10 @@ func getContentOfCourses(courseYearProgChan <-chan courseDetailParams, facultyIn
 		}
 
 		for _, c := range res {
+			if utils.IsEmpty(c) {
+				continue
+			}
+
 			// Need to resolve the course code here, course code could start with either 2 or 3 characters
 			// We will first attempt to map 2 characters, because it could be possible AA might supersede AAA
 			var faculty dto.Faculty
@@ -199,6 +202,10 @@ func getCourseTimetable(courseChan <-chan courseDetailParams, examChan chan<- ex
 		}
 
 		for _, c := range res {
+			if utils.IsEmpty(c) {
+				continue
+			}
+
 			if loaded, exists := processedCourses.Load(c.Code); exists {
 				if currCombined, ok := loaded.(Combined); ok {
 					processedCourses.Store(c.Code, Combined{
