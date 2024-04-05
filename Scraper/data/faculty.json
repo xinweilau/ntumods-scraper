@@ -5,7 +5,7 @@
   },
   "AB;AC;AD;BA;BC;BE;BF;BH;BL;BM;BR;BU;HE": {
     "Faculty": "Nanyang Business School",
-    "FacultyCode": "NBS"
+    "Code": "NBS"
   },
   "HC;HL;HR;HY;HW;HH;HG;HN;HD": {
     "Faculty": "School of Humanities",
@@ -24,19 +24,19 @@
     "Code": "CCEB"
   },
   "EE;IE": {
-    "Faculty": "School of Electrical and Electronic Engineering (EEE)",
+    "Faculty": "School of Electrical and Electronic Engineering",
     "Code": "EEE"
   },
   "MA": {
-    "Faculty": "School of Mechanical and Aerospace Engineering (MAE)",
+    "Faculty": "School of Mechanical and Aerospace Engineering",
     "Code": "MAE"
   },
   "MS;EM": {
-    "Faculty": "School of Materials Science and Engineering (MSE)",
+    "Faculty": "School of Materials Science and Engineering",
     "Code": "MSE"
   },
   "CV;EN;MT;SU": {
-    "Faculty": "School of Civil and Environmental Engineering (CEE)",
+    "Faculty": "School of Civil and Environmental Engineering",
     "Code": "CEE"
   },
   "CZ;SC;CE": {
