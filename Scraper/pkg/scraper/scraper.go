@@ -3,6 +3,8 @@ package scraper
 import (
 	"fmt"
 	"golang.org/x/net/html"
+	"math"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"ntumods/pkg/dto"
@@ -32,7 +34,7 @@ func GetCourseSchedulePair() (*dto.CourseSchedules, error) {
 		return nil, err
 	}
 
-	resp, err := http.PostForm(dto.CONTENT_OF_COURSES_INIT, *params)
+	resp, err := postFormWithExponentialBackoff(dto.GET_INITIAL_COURSE_LIST, dto.CONTENT_OF_COURSES_INIT, *params)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +54,7 @@ func GetContentOfCourses(request dto.CourseListRequestDto) ([]dto.Course, error)
 		return nil, err
 	}
 
-	resp, err := http.PostForm(dto.CONTENT_OF_COURSES, *params)
+	resp, err := postFormWithExponentialBackoff(dto.GET_COURSE_OFFERED_CONTENTS, dto.CONTENT_OF_COURSES, *params)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +75,7 @@ func GetCourseSchedule(request dto.CourseScheduleRequestDto) ([]dto.Module, erro
 		return nil, err
 	}
 
-	resp, err := http.PostForm(dto.CLASS_SCHEDULE, *params)
+	resp, err := postFormWithExponentialBackoff(dto.GET_CLASS_SCHEDULE, dto.CLASS_SCHEDULE, *params)
 	if err != nil {
 		return nil, err
 	}
@@ -93,17 +95,7 @@ func GetExamSchedule(request dto.CourseExamScheduleRequestDto) ([]dto.ExamSchedu
 		return nil, err
 	}
 
-	client := &http.Client{}
-
-	payload := strings.NewReader(params.Encode())
-	req, err := http.NewRequest("POST", dto.EXAM_SCHEDULE, payload)
-
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	res, err := client.Do(req)
+	res, err := httpPostWithExponentialBackoff(dto.GET_EXAM_SCHEDULE, dto.EXAM_SCHEDULE, *params)
 	if err != nil {
 		return nil, err
 	}
@@ -196,4 +188,47 @@ func constructRequiredExamScheduleFormData(params dto.CourseExamScheduleRequestD
 	}
 
 	return values, nil
+}
+
+func postFormWithExponentialBackoff(service string, url string, data url.Values) (*http.Response, error) {
+	var resp *http.Response
+	var err error
+	for attempt := 0; attempt < dto.MAX_RETRIES; attempt++ {
+		resp, err = http.PostForm(url, data)
+		if err == nil {
+			return resp, nil
+		}
+
+		// Calculate the delay with exponential backoff and some randomness
+		delay := dto.RETRY_DELAY*time.Duration(math.Pow(2, float64(attempt))) + time.Duration(rand.Intn(int(dto.RETRY_DELAY)))
+		fmt.Printf("failed to fetch data for [%d], will retry in [%d] seconds\n", service, delay)
+		time.Sleep(delay)
+	}
+	return nil, fmt.Errorf("after %d attempts, last error: %s", dto.MAX_RETRIES, err)
+}
+
+func httpPostWithExponentialBackoff(service string, url string, data url.Values) (*http.Response, error) {
+	client := &http.Client{}
+
+	var resp *http.Response
+	var err error
+	for attempt := 0; attempt < dto.MAX_RETRIES; attempt++ {
+		payload := strings.NewReader(data.Encode())
+		req, err := http.NewRequest("POST", url, payload)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err = client.Do(req)
+		if err == nil {
+			return resp, nil
+		}
+
+		// Calculate the delay with exponential backoff and some randomness
+		delay := dto.RETRY_DELAY*time.Duration(math.Pow(2, float64(attempt))) + time.Duration(rand.Intn(int(dto.RETRY_DELAY)))
+		fmt.Printf("failed to fetch data for [%d], will retry in [%d] seconds\n", service, delay)
+		time.Sleep(delay)
+	}
+	return nil, fmt.Errorf("after %d attempts, last error: %s", dto.MAX_RETRIES, err)
 }
