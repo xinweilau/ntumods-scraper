@@ -13,7 +13,7 @@ type Course struct {
 	NotAvailableAsPE       string  `json:"not_available_as_pe"`
 	Description            string  `json:"description"`
 	Faculty                Faculty `json:"faculty"`
-	NotOfferedAsBDE           bool    `json:"notOfferedAsBDE"`
+	NotOfferedAsBDE        bool    `json:"notOfferedAsBDE"`
 }
 
 type CourseListRequestDto struct {
@@ -92,5 +92,5 @@ type ExamSchedule struct {
 
 type Faculty struct {
 	Title string `json:"Faculty"`
-	Code  string `json:"FacultyCode"`
+	Code  string `json:"Code"`
 }
