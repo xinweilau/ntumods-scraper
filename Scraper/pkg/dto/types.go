@@ -1,6 +1,18 @@
 package dto
 
-import "reflect"
+type Course struct {
+	Code                   string `json:"code"`
+	Title                  string `json:"title"`
+	AU                     string `json:"au"`
+	Prerequisite           string `json:"prerequisite"`
+	MutuallyExclusive      string `json:"mutually_exclusive"`
+	NotAvailableTo         string `json:"not_available_to"`
+	NotAvailableToProgWith string `json:"not_available_to_prog_with"`
+	GradeType              string `json:"grade_type"`
+	NotAvailableAsUE       string `json:"not_available_as_ue"`
+	NotAvailableAsPE       string `json:"not_available_as_pe"`
+	Description            string `json:"description"`
+}
 
 type CourseListRequestDto struct {
 	AcadYearSem string
@@ -73,32 +85,4 @@ type ExamSchedule struct {
 	Code      string `json:"code"`
 	Title     string `json:"title"`
 	Duration  string `json:"duration"`
-}
-
-func IsEmpty(value interface{}) bool {
-	v := reflect.ValueOf(value)
-
-	switch v.Kind() {
-	case reflect.Struct:
-		for i := 0; i < v.NumField(); i++ {
-			if !IsEmpty(v.Field(i).Interface()) {
-				return false
-			}
-		}
-		return true
-	case reflect.Array, reflect.Slice, reflect.Map, reflect.String:
-		return v.Len() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Interface, reflect.Ptr:
-		return v.IsNil()
-	default:
-		return false
-	}
 }
