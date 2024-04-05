@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 	"ntumods/pkg/dto"
@@ -15,19 +16,132 @@ func ParseCourses(node *html.Node) ([]dto.Course, error) {
 	}
 
 	var courses []dto.Course
-	for _, node := range nodes {
-		c, err := parseToCourse(node)
 
+	// Minor Courses and BDEs
+	if len(nodes) == 1 {
+		courses, err = ParseMinorAndBDE(nodes[0])
 		if err != nil {
 			return nil, err
 		}
-		courses = append(courses, c)
+	} else {
+		// Normal Courses
+		for _, n := range nodes {
+			c, err := parseNormalCourse(n)
+
+			if err != nil {
+				return nil, err
+			}
+			courses = append(courses, c)
+		}
 	}
 
 	return courses, nil
 }
 
-func parseToCourse(node *html.Node) (dto.Course, error) {
+func ParseMinorAndBDE(node *html.Node) ([]dto.Course, error) {
+	var resp []dto.Course
+
+	mappings := map[string]string{
+		"Prerequisite:":                         "prerequisite",
+		"Grade Type:":                           "grade_type",
+		"Mutually exclusive with:":              "mutually_exclusive",
+		"Not available to Programme:":           "not_available_to",
+		"Not available to all Programme with:":  "not_available_to_prog_with",
+		"Not available as BDE/UE to Programme:": "not_available_as_ue",
+		"Not available as PE to Programme:":     "not_available_as_pe",
+	}
+
+	nodes, err := htmlquery.QueryAll(node, "//table//tr[position() > 1]/td")
+	if err != nil {
+		return resp, nil
+	}
+
+	if len(nodes) == 0 {
+		return resp, nil
+	}
+
+	courses := make([]map[string]interface{}, 0)
+
+	course := make(map[string]interface{})
+	key := ""
+	isMultiRow := false
+	isMetaData := true
+	// need to modify to skip the 4th item
+	for i := 0; i < len(nodes)-1; i += 1 {
+		innerText := htmlquery.InnerText(nodes[i])
+		value := strings.Join(strings.Fields(innerText), " ")
+
+		// Blank space for other values
+		if innerText == "" {
+			continue
+		}
+
+		// blank space between rows
+		if len(innerText) > 0 && strings.TrimSpace(innerText) == "" {
+			fmt.Println("Complete Course", course)
+
+			courses = append(courses, course)
+			course = make(map[string]interface{})
+			isMetaData = true
+			continue
+		}
+
+		if isMetaData {
+			course["code"] = strings.Join(strings.Fields(htmlquery.InnerText(nodes[i])), " ")
+			course["title"] = strings.Join(strings.Fields(htmlquery.InnerText(nodes[i+1])), " ")
+			course["au"] = strings.Join(strings.Fields(htmlquery.InnerText(nodes[i+2])), " ")
+
+			// dept is a non-existent key, exist only for completeness and does not get translated to course struct later on
+			course["dept"] = strings.Join(strings.Fields(htmlquery.InnerText(nodes[i+3])), " ")
+
+			i += 3
+			isMetaData = false
+			continue
+		}
+
+		if _, exists := mappings[value]; exists {
+			key = value
+			continue
+		}
+
+		if key != "" {
+			isMultiRow = strings.HasSuffix(value, "OR")
+
+			if curr, exist := course[mappings[key]]; exist {
+				course[mappings[key]] = curr.(string) + value
+			} else {
+				course[mappings[key]] = value
+			}
+
+			if !isMultiRow {
+				key = ""
+			}
+			continue
+		}
+
+		course["description"] = value
+	}
+
+	for _, c := range courses {
+		// Marshal the interface into JSON
+		courseJSON, err := json.Marshal(c)
+		if err != nil {
+			return resp, err
+		}
+
+		var respCourse dto.Course
+		// Unmarshal the JSON into a struct
+		if err = json.Unmarshal(courseJSON, &respCourse); err != nil {
+			return resp, err
+		}
+
+		resp = append(resp, respCourse)
+	}
+
+	return resp, nil
+}
+
+func parseNormalCourse(node *html.Node) (dto.Course, error) {
 	var resp dto.Course
 
 	mappings := map[string]string{
@@ -58,6 +172,8 @@ func parseToCourse(node *html.Node) (dto.Course, error) {
 	course["description"] = strings.Join(strings.Fields(htmlquery.InnerText(nodes[len(nodes)-1])), " ")
 
 	var key string
+	isMultiRow := false
+
 	for i := 3; i < len(nodes)-1; i += 1 {
 		if key == "" {
 			key = strings.TrimSpace(htmlquery.InnerText(nodes[i]))
@@ -66,8 +182,17 @@ func parseToCourse(node *html.Node) (dto.Course, error) {
 
 		value := strings.Join(strings.Fields(htmlquery.InnerText(nodes[i])), " ")
 
-		course[mappings[key]] = value
-		key = ""
+		isMultiRow = strings.HasSuffix(value, "OR")
+
+		if curr, exist := course[mappings[key]]; exist {
+			course[mappings[key]] = curr.(string) + value
+		} else {
+			course[mappings[key]] = value
+		}
+
+		if !isMultiRow {
+			key = ""
+		}
 	}
 
 	// Marshal the interface into JSON
