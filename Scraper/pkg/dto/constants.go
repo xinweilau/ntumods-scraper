@@ -18,3 +18,8 @@ const (
 
 const MAX_RETRIES = 3
 const RETRY_DELAY = 5 * time.Second
+
+const (
+	ACCOUNT_NAME   = "ntumodssa"
+	CONTAINER_NAME = "ntumodssc"
+)

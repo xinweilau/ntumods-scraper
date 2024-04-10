@@ -3,10 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"ntumods/pkg/dto"
 	"ntumods/pkg/scraper"
 	"ntumods/pkg/utils"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -36,6 +39,11 @@ var courseDetailWg sync.WaitGroup
 var examDetailWg sync.WaitGroup
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	facultyInformation, err := populateFacultyInformation()
 	if err != nil {
 		panic(err)
@@ -101,6 +109,11 @@ func main() {
 
 	numModules := 0
 	processedCourses.Range(func(key, value interface{}) bool {
+		// For some reason there's always an empty Course.json generated, this is to bypass that
+		if key == "Course" {
+			return true
+		}
+
 		c := value.(Combined)
 
 		moduleLite := dto.ModuleLite{
@@ -117,11 +130,19 @@ func main() {
 
 		numModules += 1
 
-		utils.ExportStructToFile(key.(string), value)
+		fileName := key.(string)
+		blobName := filepath.Join(latestSemester, fileName+".json")
+		if err = utils.UploadFileToBlobStorage(blobName, value); err != nil {
+			fmt.Println("Error uploading file to blob storage:", err)
+			return false
+		}
 		return true
 	})
 
-	utils.ExportStructToFile("moduleList", moduleList)
+	blobName := filepath.Join(latestSemester, "moduleList.json")
+	if err = utils.UploadFileToBlobStorage(blobName, moduleList); err != nil {
+		fmt.Println("Error uploading file to blob storage:", err)
+	}
 
 	fmt.Println("Extraction Complete (numModules = ", numModules, ")")
 }

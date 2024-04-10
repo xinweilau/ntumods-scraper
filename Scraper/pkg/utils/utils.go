@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Azure/azure-storage-blob-go/azblob"
+	"net/url"
+	"ntumods/pkg/dto"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -65,4 +69,41 @@ func ExportStructToFile(filename string, data interface{}) {
 		fmt.Println("Error writing to file:", err)
 		return
 	}
+}
+
+func UploadFileToBlobStorage(blobName string, data interface{}) error {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("[UploadFileToBlobStorage] Error marshaling data:", err)
+		return err
+	}
+
+	azureStorageAccountAccessKey := os.Getenv("AZURE_STORAGE_ACCOUNT_ACCESS_KEY")
+
+	credential, err := azblob.NewSharedKeyCredential(dto.ACCOUNT_NAME, azureStorageAccountAccessKey)
+	if err != nil {
+		return fmt.Errorf("[UploadFileToBlobStorage] Failed to create credential: %v", err)
+	}
+
+	// Create a service URL that points to your storage account.
+	serviceURL := fmt.Sprintf("https://%s.blob.core.windows.net/", dto.ACCOUNT_NAME)
+	u, err := url.Parse(serviceURL)
+	if err != nil {
+		return fmt.Errorf("[UploadFileToBlobStorage] Failed to parse service URL: %v", err)
+	}
+
+	// Create a pipeline using the storage account's credentials.
+	p := azblob.NewPipeline(credential, azblob.PipelineOptions{})
+
+	// Create a container URL using the pipeline, service URL, and container name.
+	containerURL := azblob.NewContainerURL(*u, p).NewBlockBlobURL(dto.CONTAINER_NAME + "/" + blobName)
+
+	// Upload the JSON data to the blob.
+	_, err = azblob.UploadBufferToBlockBlob(context.Background(), jsonData, containerURL, azblob.UploadToBlockBlobOptions{})
+	if err != nil {
+		return fmt.Errorf("[UploadFileToBlobStorage] Failed to upload JSON data to blob: %v", err)
+	}
+
+	fmt.Printf("[UploadFileToBlobStorage] Successfully uploaded JSON data to blob '%s'\n", blobName)
+	return nil
 }
