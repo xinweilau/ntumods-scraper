@@ -3,7 +3,7 @@ package dto
 type Course struct {
 	Code                   string  `json:"code"`
 	Title                  string  `json:"title"`
-	AU                     string  `json:"au"`
+	AU                     float32 `json:"au"`
 	Prerequisite           string  `json:"prerequisite"`
 	MutuallyExclusive      string  `json:"mutually_exclusive"`
 	NotAvailableTo         string  `json:"not_available_to"`
@@ -59,7 +59,7 @@ type ModuleLite struct {
 	Code        string  `json:"code"`
 	Module      string  `json:"module"`
 	Description string  `json:"description"`
-	AU          string  `json:"au"`
+	AU          float32 `json:"au"`
 	Faculty     Faculty `json:"faculty"`
 }
 
