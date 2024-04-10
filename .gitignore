@@ -1,0 +1,18 @@
+# Terraform
+deploy/.terraform
+deploy/.terraform.lock.hcl
+deploy/terraform.tfstate
+deploy/terraform.tfstate.backup
+
+# Scraper
+Scraper/.idea
+Scraper/.env
+Scraper/data/index.html
+Scraper/data/sched.html
+Scraper/out
+Scraper/out.zip
+
+# OS
+.DS_Store
+Scraper/.DS_Store
+deploy/.DS_Store
