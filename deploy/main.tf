@@ -24,6 +24,16 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type          = "LRS"
   public_network_access_enabled     = true
   allow_nested_items_to_be_public   = true
+
+  blob_properties {
+    cors_rule {
+      allowed_headers = ["*"]
+      allowed_methods = ["GET", "OPTIONS"]
+      allowed_origins = ["*"]
+      exposed_headers = ["*"]
+      max_age_in_seconds = 86400
+    }
+  }
 }
 
 resource "azurerm_storage_container" "sc" {
