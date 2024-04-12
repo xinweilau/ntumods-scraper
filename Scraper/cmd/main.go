@@ -39,7 +39,7 @@ var courseDetailWg sync.WaitGroup
 var examDetailWg sync.WaitGroup
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
