@@ -134,6 +134,13 @@ func parseMinorAndBDE(node *html.Node) ([]dto.Course, error) {
 		}
 
 		course["description"] = value
+
+		// if this is the last course, then it needs to be added
+		if i == len(nodes)-2 {
+			courses = append(courses, course)
+			course = make(map[string]interface{})
+			isMetaData = true
+		}
 	}
 
 	for _, c := range courses {
