@@ -71,14 +71,15 @@ type Module struct {
 }
 
 type Schedule struct {
-	StartTime  string `json:"startTime"`
-	EndTime    string `json:"endTime"`
-	Venue      string `json:"venue"`
-	ClassType  string `json:"classType"`
-	Index      string `json:"index"`
-	IndexGroup string `json:"indexGroup"`
-	DayOfWeek  string `json:"dayOfWeek"`
-	Remarks    string `json:"remarks"`
+	StartTime     string `json:"startTime"`
+	EndTime       string `json:"endTime"`
+	Venue         string `json:"venue"`
+	ClassType     string `json:"classType"`
+	Index         string `json:"index"`
+	IndexGroup    string `json:"indexGroup"`
+	DayOfWeek     string `json:"dayOfWeek"`
+	Remarks       string `json:"remarks"`
+	TeachingWeeks []int  `json:"teachingWeeks"`
 }
 
 type ExamSchedule struct {

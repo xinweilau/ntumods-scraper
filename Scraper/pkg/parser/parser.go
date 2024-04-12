@@ -6,6 +6,7 @@ import (
 	"github.com/antchfx/htmlquery"
 	"golang.org/x/net/html"
 	"ntumods/pkg/dto"
+	"ntumods/pkg/utils"
 	"strconv"
 	"strings"
 )
@@ -72,6 +73,7 @@ func parseMinorAndBDE(node *html.Node) ([]dto.Course, error) {
 	key := ""
 	isMultiRow := false
 	isMetaData := true
+
 	// need to modify to skip the 4th item
 	for i := 0; i < len(nodes)-1; i += 1 {
 		innerText := htmlquery.InnerText(nodes[i])
@@ -309,15 +311,44 @@ func ParseCourseModuleSchedules(doc *html.Node) []dto.Module {
 				endTime = rangeOfTime[1]
 			}
 
+			teachingWeeks := make([]int, 0)
+			remarks := strings.TrimSpace(htmlquery.InnerText(borderTds[6]))
+			// Teaching Wk1-4,6-9,11-13
+			if strings.Contains(remarks, "Teaching Wk") {
+				weeks := strings.Split(remarks, "Teaching Wk")[1]
+				rangeWeeks := strings.Split(weeks, ",")
+
+				for _, r := range rangeWeeks {
+					startEnd := strings.Split(r, "-")
+					start, _ := strconv.Atoi(startEnd[0])
+
+					// means that it is not a range, but a singular week
+					if len(startEnd) == 1 {
+						teachingWeeks = append(teachingWeeks, start)
+						continue
+					}
+
+					end, _ := strconv.Atoi(startEnd[1])
+
+					sliceRange := utils.CreateIntSlice(start, end)
+					teachingWeeks = append(teachingWeeks, sliceRange...)
+				}
+
+				if len(teachingWeeks) == 0 {
+					teachingWeeks = utils.CreateIntSlice(1, 13)
+				}
+			}
+
 			schedule = dto.Schedule{
-				Index:      index,
-				ClassType:  strings.TrimSpace(htmlquery.InnerText(borderTds[1])),
-				IndexGroup: strings.TrimSpace(htmlquery.InnerText(borderTds[2])),
-				DayOfWeek:  strings.TrimSpace(htmlquery.InnerText(borderTds[3])),
-				StartTime:  startTime,
-				EndTime:    endTime,
-				Venue:      strings.TrimSpace(htmlquery.InnerText(borderTds[5])),
-				Remarks:    strings.TrimSpace(htmlquery.InnerText(borderTds[6])),
+				Index:         index,
+				ClassType:     strings.TrimSpace(htmlquery.InnerText(borderTds[1])),
+				IndexGroup:    strings.TrimSpace(htmlquery.InnerText(borderTds[2])),
+				DayOfWeek:     strings.TrimSpace(htmlquery.InnerText(borderTds[3])),
+				StartTime:     startTime,
+				EndTime:       endTime,
+				Venue:         strings.TrimSpace(htmlquery.InnerText(borderTds[5])),
+				Remarks:       strings.TrimSpace(htmlquery.InnerText(borderTds[6])),
+				TeachingWeeks: teachingWeeks,
 			}
 
 			module.Schedules = append(module.Schedules, schedule)

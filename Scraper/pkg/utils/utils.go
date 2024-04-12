@@ -107,3 +107,14 @@ func UploadFileToBlobStorage(blobName string, data interface{}) error {
 	fmt.Printf("[UploadFileToBlobStorage] Successfully uploaded JSON data to blob '%s'\n", blobName)
 	return nil
 }
+
+func CreateIntSlice(start, end int) []int {
+	n := end - start + 1
+	slice := make([]int, n)
+
+	for i := 0; i < n; i++ {
+		slice[i] = start + i
+	}
+
+	return slice
+}
