@@ -344,6 +344,9 @@ func ParseCourseModuleSchedules(doc *html.Node) []dto.Module {
 				if len(teachingWeeks) == 0 {
 					teachingWeeks = utils.CreateIntSlice(1, 13)
 				}
+			} else if remarks != "Not conducted during Teaching Weeks" {
+				sliceRange := utils.CreateIntSlice(1, 13)
+				teachingWeeks = append(teachingWeeks, sliceRange...)
 			}
 
 			schedule = dto.Schedule{
