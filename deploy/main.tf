@@ -168,3 +168,48 @@ resource "azurerm_logic_app_trigger_recurrence" "sem2" {
 #     password = var.docker_hub_password
 #   }
 # }
+
+# resource "azurerm_container_group" "frontend" {
+#   name                = "ntumods-frontend"
+#   location            = azurerm_resource_group.rg.location
+#   resource_group_name = azurerm_resource_group.rg.name
+#   os_type             = "Linux"
+#   restart_policy      = "OnFailure"
+#   dns_name_label      = "ntumods-frontend"
+
+#   container {
+#     name   = "ntumods-frontend"
+#     image  = "xinweilau/myrepopo:ntumods-frontend"
+#     cpu    = 0.25
+#     memory = 0.5
+
+#     ports {
+#       port     = 3000
+#       protocol = "TCP"
+#     }
+#   }
+
+#   container {
+#     name   = "nginx"
+#     image  = "nginx:latest"
+#     cpu    = 0.25
+#     memory = 0.5
+
+#     ports {
+#       port     = 80
+#       protocol = "TCP"
+#     }
+
+#     commands = [
+#       "/bin/sh",
+#       "-c",
+#       "echo 'server { listen 80; location / { proxy_pass http://localhost:3000; }}' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+#     ]
+#   }
+
+#   image_registry_credential {
+#     server   = "index.docker.io"
+#     username = var.docker_hub_username
+#     password = var.docker_hub_password
+#   }
+# }
