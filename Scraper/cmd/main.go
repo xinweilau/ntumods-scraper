@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
+	"net/http"
 	"ntumods/pkg/dto"
 	"ntumods/pkg/scraper"
 	"ntumods/pkg/utils"
@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/joho/godotenv"
 )
 
 const maxWorkers = 3
@@ -38,7 +40,7 @@ type Combined struct {
 var courseDetailWg sync.WaitGroup
 var examDetailWg sync.WaitGroup
 
-func main() {
+func executeScraper() {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -312,4 +314,13 @@ func populateFacultyInformation() (map[string]dto.Faculty, error) {
 	}
 
 	return output, nil
+}
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		executeScraper();
+	})
+
+	fmt.Println("Listening on port 8080")
+	http.ListenAndServe("127.0.0.1:8080", nil)
 }
