@@ -62,3 +62,82 @@ resource "azurerm_storage_management_policy" "storage_policy" {
     }
   }
 }
+
+# Host the NTUMods Scraper
+variable "docker_hub_username" {}
+variable "docker_hub_password" {}
+
+resource "azurerm_container_group" "acg" {
+  name                = "ntumods-scraper"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  os_type             = "Linux"
+  restart_policy      = "OnFailure"
+  dns_name_label      = "ntumods-scraper"
+
+  container {
+    name   = "ntumods-scraper"
+    image  = "xinweilau/myrepopo:ntumods-scraper"
+    cpu    = 0.25
+    memory = 0.5
+
+    ports {
+      port     = 8080
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = "index.docker.io"
+    username = var.docker_hub_username
+    password = var.docker_hub_password
+  }
+}
+
+resource "azurerm_logic_app_workflow" "lapp" {
+  name                = "ntumodsscraper"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_logic_app_trigger_http_request" "ltrig_req" {
+  name         = "trigger-scraper-req"
+  logic_app_id = azurerm_logic_app_workflow.lapp.id
+
+  schema = <<SCHEMA
+  {
+      "type": "object",
+      "properties": {
+          "method": {
+              "type": "string"
+          }
+      }
+  }
+  SCHEMA
+}
+
+resource "azurerm_logic_app_action_http" "lact" {
+  name         = "request-to-scrape"
+  logic_app_id = azurerm_logic_app_workflow.lapp.id
+
+  method  = "GET"
+  uri     = "http://${azurerm_container_group.acg.dns_name_label}.southeastasia.azurecontainer.io:8080"
+}
+
+resource "azurerm_logic_app_trigger_recurrence" "sem1" {
+  name         = "run-for-semester1"
+  logic_app_id = azurerm_logic_app_workflow.lapp.id
+  frequency    = "Month"
+  start_time   = "2024-06-01T00:00:00Z"
+  time_zone    = "Singapore Standard Time"
+  interval     = 12
+}
+
+resource "azurerm_logic_app_trigger_recurrence" "sem2" {
+  name         = "run-for-semester2"
+  logic_app_id = azurerm_logic_app_workflow.lapp.id
+  frequency    = "Month"
+  start_time   = "2024-12-01T00:00:00Z"
+  time_zone    = "Singapore Standard Time"
+  interval     = 12
+}
