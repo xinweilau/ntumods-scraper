@@ -141,3 +141,30 @@ resource "azurerm_logic_app_trigger_recurrence" "sem2" {
   time_zone    = "Singapore Standard Time"
   interval     = 12
 }
+
+# resource "azurerm_container_group" "backend" {
+#   name                = "ntumods-backend"
+#   location            = azurerm_resource_group.rg.location
+#   resource_group_name = azurerm_resource_group.rg.name
+#   os_type             = "Linux"
+#   restart_policy      = "OnFailure"
+#   dns_name_label      = "ntumods-backend"
+
+#   container {
+#     name   = "ntumods-backend"
+#     image  = "xinweilau/myrepopo:ntumods-backend"
+#     cpu    = 0.25
+#     memory = 0.5
+
+#     ports {
+#       port     = 8080
+#       protocol = "TCP"
+#     }
+#   }
+
+#   image_registry_credential {
+#     server   = "index.docker.io"
+#     username = var.docker_hub_username
+#     password = var.docker_hub_password
+#   }
+# }
